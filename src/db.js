@@ -1,22 +1,18 @@
-const MongoClient = require('mongodb').MongoClient;
-let mongoDB;
+import { MongoClient } from "mongodb";
 
-const setupDB = callback => {
-  MongoClient.connect(
-    process.env.MONGO_DB_URL,
-    { useNewUrlParser: true, useUnifiedTopology: true },
-    (err, _) => {
-      if (err) {
-        return callback(err);
-      } else {
-        return callback(null, 'DB connection successful!');
-      }
-    }
-  );
-};
+const dbname = process.env.MONGO_DB_NAME || "nodejs-kubernetes";
+const dburl = process.env.MONGO_DB_URL || 'mongodb://localhost:27017/';
 
-const getDB = () => {
-  return mongoDB;
-};
+const connOpt = { useNewUrlParser: true, useUnifiedTopology: true };
+const client = new MongoClient(dburl, connOpt);
 
-module.exports = { setupDB, getDB };
+let conn;
+try {
+  conn = await client.connect();
+} catch(e) {
+  console.error(e);
+}
+console.log("✅ MongoDB Connected");
+let db = conn.db(dbname);
+console.log("✅ DB Selected");
+export default db;
